@@ -1,9 +1,8 @@
-from django.db import models
 from django.contrib import admin
+from django.db import models
 
 
 class Weather(models.Model):
-
     FORECAST_TYPE = (
         (0, 'Current'),
         (1, 'Minute for 1 hour'),
@@ -14,7 +13,18 @@ class Weather(models.Model):
     search_lon = models.FloatField()
     search_date = models.DateTimeField(auto_now=True)
     forecast_type = models.CharField(
-        choices=FORECAST_TYPE, max_length=20, default=0)
+        choices=FORECAST_TYPE,
+        max_length=20,
+        default=0,
+    )
+
+    weather_main = models.CharField(max_length=30, null=True)
+    description = models.CharField(max_length=50, null=True)
+    temperature = models.FloatField(blank=True, null=True)
+    feels_like = models.FloatField(blank=True, null=True)
+    pressure = models.IntegerField(blank=True, null=True)
+    humidity = models.IntegerField(blank=True, null=True)
+    wind_speed = models.FloatField(blank=True, null=True)
 
 
 admin.site.register(Weather)
