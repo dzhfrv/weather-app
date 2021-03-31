@@ -10,6 +10,7 @@ from .models import Weather
 
 
 class WeatherView(APIView):
+
     def post(self, request):
         lat = request.data['search_lat']
         lon = request.data['search_lon']
@@ -21,7 +22,6 @@ class WeatherView(APIView):
             forecast_type=forecast_type,
         )
         if created:
-            # self.forecast_type_link()
             api_link = 'http://api.openweathermap.org/data/2.5/weather'
             link = api_link + f'?lat={lat}&lon={lon}&appid={appkey}'
             response = requests.post(link)
@@ -37,7 +37,12 @@ class WeatherView(APIView):
             # return HttpResponse(response)
             return HttpResponse(new_instance)
         else:
-            # print('already exist - return from database')
-            # print(dir(new_instance), '\n')
-            # print(type(new_instance))
+            #TODO если дейттайм создания записи > 10 минут, брать свежие данные
             return HttpResponse(new_instance)
+
+        #
+        # TODO: 1)добавить ссылки, проверить что json формат у ответа
+        #       одинаковый, если нет - подумать о хранении респонса в jsonField
+        #       2)продумать таймер ( перечитать ТЗ)
+        #       3)в каком виде возвращать данные?
+        #       4)валидации и тесты
