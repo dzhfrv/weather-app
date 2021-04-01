@@ -109,5 +109,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# WeatherAPI settings
 WEATHER_API_KEY = config('WEATHER_API_KEY')
 SEARCH_TIME_MINUTES = 1
