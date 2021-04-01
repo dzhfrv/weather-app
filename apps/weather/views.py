@@ -1,10 +1,10 @@
-import json
 import requests
 
 from datetime import timedelta
-from django.http import HttpResponse
+
 from django.utils import timezone
 from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from config.settings import (
     WEATHER_API_KEY,
@@ -51,8 +51,8 @@ class WeatherView(APIView):
                 obj.search_result = response.json()
                 obj.save()
             except requests.exceptions.RequestException as e:
-                return HttpResponse(e)
-            return HttpResponse(response)
+                return Response(e)
+            return Response(response.json())
         else:
             data = obj.search_result
-            return HttpResponse(json.dumps(data))
+            return Response(data)
