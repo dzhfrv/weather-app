@@ -1,66 +1,60 @@
-import requests
-
 from datetime import datetime, timedelta
 
+import requests
 from django.http import HttpResponse
 from rest_framework.views import APIView
 
-from config.settings import WEATHER_API_KEY as appkey
+from config.settings import (
+    WEATHER_API_KEY,
+    SEARCH_TIME_MINUTES,
+)
 from .models import Weather
 
 
 class WeatherView(APIView):
+    def build_link(self, lat, lon, search_type):
+        api_link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}'  # noqa
+        if search_type == 'current':
+            link = api_link + '&exclude=minutely,hourly,daily'
+        if search_type == 'minute':
+            link = api_link + '&exclude=current,hourly,daily'
+        if search_type == 'hourly':
+            link = api_link + '&exclude=current,minutely,daily'
+        if search_type == 'daily':
+            link = api_link + '&exclude=current,minutely,hourly'
+        return link
 
-    # def get_weather_data(self, type, lat, lon):
-    #     print(type, lat, lon, "\n")
-    #     link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={appkey}'
-    #     response = requests.post(link)
-    #     print(response)
-    #     resp = response.json()
-    #     print(resp['hourly'], '\n', resp['hourly'], '\n', resp['current'], '\n')
+    def compare_dates(self, search_date):
+        present = datetime.now()
+        time_basis = present - timedelta(minutes=SEARCH_TIME_MINUTES)
+        print(search_date.date() < time_basis.date())
+        return search_date.date() < time_basis.date()
 
     def post(self, request):
         lat = request.data['search_lat']
         lon = request.data['search_lon']
-        forecast_type = request.data['forecast_type']
-
+        search_type = request.data['search_type']
+        link = self.build_link(lat, lon, search_type)
         obj, created = Weather.objects.get_or_create(
             search_lat=lat,
             search_lon=lon,
-            forecast_type=forecast_type,
+            search_type=search_type,
         )
+
         if created:
-            # self.get_weather_data(forecast_type, lat, lon)
-            link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={appkey}'
             response = requests.post(link)
-            # resp = response.json()
-            # obj.weather_main = resp['weather'][0]['main']
-            # obj.description = resp['weather'][0]['description']
-            # obj.temperature = resp['main']['temp']
-            # obj.feels_like = resp['main']['feels_like']
-            # obj.pressure = resp['main']['pressure']
-            # obj.humidity = resp['main']['humidity']
-            # obj.wind_speed = resp['wind']['speed']
+            obj.search_result = response.json()
             obj.save()
-            # return HttpResponse(response)
-            return HttpResponse(obj)
+            return HttpResponse(response)
         else:
             search_date = obj.search_date
-            # print(search_date)
-            present = datetime.now()
-            timeframe = present - timedelta(minutes=10)
-            # print(timeframe)
-            if search_date.date() < timeframe.date():
-                print('out of time')  # брать свежие данные
+            is_old_data = self.compare_dates(search_date)
+            if is_old_data:
+                print(1)
+                print('data updated with - ')  # брать свежие данные
+                obj.save()
             else:
                 print('not 10 minutes yet')  # возвращать из базы
+                return HttpResponse(obj)
 
-            #TODO если дейттайм создания записи > 10 минут, брать свежие данные
-            return HttpResponse(obj)
-
-        #
-        # TODO: 1)добавить ссылки, проверить что json формат у ответа
-        #       одинаковый, если нет - подумать о хранении респонса в jsonField
         #       2)продумать таймер ( перечитать ТЗ)
-        #       3)в каком виде возвращать данные?
-        #       4)валидации и тесты
