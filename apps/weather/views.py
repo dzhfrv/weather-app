@@ -11,13 +11,13 @@ from .models import Weather
 
 class WeatherView(APIView):
 
-    def get_weather_data(self, type, lat, lon):
-        print(type, lat, lon, "\n")
-        link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={appkey}'
-        response = requests.post(link)
-        print(response)
-        resp = response.json()
-        print(resp['hourly'], '\n', resp['hourly'], '\n', resp['current'], '\n')
+    # def get_weather_data(self, type, lat, lon):
+    #     print(type, lat, lon, "\n")
+    #     link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={appkey}'
+    #     response = requests.post(link)
+    #     print(response)
+    #     resp = response.json()
+    #     print(resp['hourly'], '\n', resp['hourly'], '\n', resp['current'], '\n')
 
     def post(self, request):
         lat = request.data['search_lat']
@@ -30,18 +30,17 @@ class WeatherView(APIView):
             forecast_type=forecast_type,
         )
         if created:
-            self.get_weather_data(forecast_type, lat, lon)
-            api_link = 'http://api.openweathermap.org/data/2.5/weather'
-            link = api_link + f'?lat={lat}&lon={lon}&appid={appkey}'
+            # self.get_weather_data(forecast_type, lat, lon)
+            link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={appkey}'
             response = requests.post(link)
-            resp = response.json()
-            obj.weather_main = resp['weather'][0]['main']
-            obj.description = resp['weather'][0]['description']
-            obj.temperature = resp['main']['temp']
-            obj.feels_like = resp['main']['feels_like']
-            obj.pressure = resp['main']['pressure']
-            obj.humidity = resp['main']['humidity']
-            obj.wind_speed = resp['wind']['speed']
+            # resp = response.json()
+            # obj.weather_main = resp['weather'][0]['main']
+            # obj.description = resp['weather'][0]['description']
+            # obj.temperature = resp['main']['temp']
+            # obj.feels_like = resp['main']['feels_like']
+            # obj.pressure = resp['main']['pressure']
+            # obj.humidity = resp['main']['humidity']
+            # obj.wind_speed = resp['wind']['speed']
             obj.save()
             # return HttpResponse(response)
             return HttpResponse(obj)

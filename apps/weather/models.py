@@ -18,7 +18,7 @@ class Weather(models.Model):
         max_length=20,
         default=0,
     )
-    search_result = JSONField()
+    search_result = JSONField(null=True, blank=True)
 
 admin.site.register(Weather)
 
