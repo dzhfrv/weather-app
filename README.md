@@ -1,7 +1,7 @@
-# weather-app
+# (WIP)weather-app
 
-.env file is required
-```buildoutcfg
+###.env file is required
+```
 SECRET_KEY = ''
 DEBUG = True
 WEATHER_API_KEY = ''
