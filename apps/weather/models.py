@@ -22,3 +22,4 @@ class Weather(models.Model):
 
 admin.site.register(Weather)
 
+
