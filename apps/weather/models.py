@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.db import models
+from django.db.models import JSONField
 
 
 class Weather(models.Model):
@@ -12,19 +13,12 @@ class Weather(models.Model):
     search_lat = models.FloatField()
     search_lon = models.FloatField()
     search_date = models.DateTimeField(auto_now=True)
-    forecast_type = models.CharField(
+    search_type = models.CharField(
         choices=FORECAST_TYPE,
         max_length=20,
         default=0,
     )
-
-    weather_main = models.CharField(max_length=30, null=True)
-    description = models.CharField(max_length=50, null=True)
-    temperature = models.FloatField(blank=True, null=True)
-    feels_like = models.FloatField(blank=True, null=True)
-    pressure = models.IntegerField(blank=True, null=True)
-    humidity = models.IntegerField(blank=True, null=True)
-    wind_speed = models.FloatField(blank=True, null=True)
-
+    search_result = JSONField()
 
 admin.site.register(Weather)
+
