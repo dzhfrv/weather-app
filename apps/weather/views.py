@@ -12,27 +12,24 @@ from config.settings import (
 )
 from .models import Weather
 
+from .serializers import WeatherEndpointDataSerializer
+
 
 class WeatherView(APIView):
-    def build_link(self, lat, lon, search_type):
-        api_link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}'  # noqa
-        if search_type == 'current':
-            link = api_link + '&exclude=minutely,hourly,daily'
-        if search_type == 'minute':
-            link = api_link + '&exclude=current,hourly,daily'
-        if search_type == 'hourly':
-            link = api_link + '&exclude=current,minutely,daily'
-        if search_type == 'daily':
-            link = api_link + '&exclude=current,minutely,hourly'
-        return link
-
     def post(self, request):
+        """
+        POST /weather-api/weather/
+        :return: JSON of the weather instance received from OpenWeatherApi
+        """
+        serializer = WeatherEndpointDataSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         lat = request.data['search_lat']
         lon = request.data['search_lon']
         search_type = request.data['search_type']
+
         link = self.build_link(lat, lon, search_type)
         time = timezone.now() - timedelta(minutes=SEARCH_TIME_MINUTES)
-
         obj = Weather.objects.filter(
             search_lat=lat,
             search_lon=lon,
@@ -56,3 +53,15 @@ class WeatherView(APIView):
         else:
             data = obj.search_result
             return Response(data)
+
+    def build_link(self, lat, lon, search_type):
+        api_link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}'  # noqa
+        if search_type == 'current':
+            link = api_link + '&exclude=minutely,hourly,daily'
+        if search_type == 'minute':
+            link = api_link + '&exclude=current,hourly,daily'
+        if search_type == 'hourly':
+            link = api_link + '&exclude=current,minutely,daily'
+        if search_type == 'daily':
+            link = api_link + '&exclude=current,minutely,hourly'
+        return link
