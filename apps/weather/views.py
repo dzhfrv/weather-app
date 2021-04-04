@@ -1,58 +1,59 @@
-import requests
-
 from datetime import timedelta
 
 from django.utils import timezone
-from rest_framework.views import APIView
+from requests.exceptions import RequestException
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from config.settings import (
-    WEATHER_API_KEY,
-    SEARCH_TIME_MINUTES,
-)
+from config.settings import SEARCH_TIME_MINUTES
 from .models import Weather
+from .serializers import WeatherEndpointDataSerializer
+from .utils import build_link, weather_api_call
 
 
 class WeatherView(APIView):
-    def build_link(self, lat, lon, search_type):
-        api_link = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}'  # noqa
-        if search_type == 'current':
-            link = api_link + '&exclude=minutely,hourly,daily'
-        if search_type == 'minute':
-            link = api_link + '&exclude=current,hourly,daily'
-        if search_type == 'hourly':
-            link = api_link + '&exclude=current,minutely,daily'
-        if search_type == 'daily':
-            link = api_link + '&exclude=current,minutely,hourly'
-        return link
-
     def post(self, request):
-        lat = request.data['search_lat']
-        lon = request.data['search_lon']
-        search_type = request.data['search_type']
-        link = self.build_link(lat, lon, search_type)
-        time = timezone.now() - timedelta(minutes=SEARCH_TIME_MINUTES)
+        """
+        POST /weather-api/weather/
+        :return: JSON of the weather instance received from OpenWeatherApi
+        """
+        serializer = WeatherEndpointDataSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
+        # receiving request params
+        search_lat = request.data['search_lat']
+        search_lon = request.data['search_lon']
+        search_type = request.data['search_type']
+
+        link = build_link(search_lat, search_lon, search_type)
+        minutes = timezone.now() - timedelta(minutes=SEARCH_TIME_MINUTES)
+
+        # __gte checks if object created 'minutes' ago
         obj = Weather.objects.filter(
-            search_lat=lat,
-            search_lon=lon,
+            search_lat=search_lat,
+            search_lon=search_lon,
             search_type=search_type,
-            search_date__gte=time,
+            search_date__gte=minutes,
         ).last()
 
-        if not obj:
-            try:
-                response = requests.post(link)
-                obj = Weather(
-                    search_lat=lat,
-                    search_lon=lon,
-                    search_type=search_type,
-                )
-                obj.search_result = response.json()
-                obj.save()
-            except requests.exceptions.RequestException as e:
-                return Response(e)
-            return Response(response.json())
+        if obj:
+            # return from DB
+            result = obj.search_result
+            return Response(result)
         else:
-            data = obj.search_result
-            return Response(data)
+            # API call
+            try:
+                result = weather_api_call(link)
+                Weather.objects.create(
+                    search_lat=search_lat,
+                    search_lon=search_lon,
+                    search_type=search_type,
+                    search_result=result,
+                )
+                return Response(result)
+            except RequestException:
+                return Response(
+                    'Unable to proceed with the API call',
+                    status.HTTP_503_SERVICE_UNAVAILABLE
+                )
