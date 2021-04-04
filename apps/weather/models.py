@@ -5,10 +5,10 @@ from django.db.models import JSONField
 
 class Weather(models.Model):
     FORECAST_TYPE = (
-        ('current', 'Current'),
-        ('minute', 'Minute for 1 hour'),
-        ('hourly', 'Hourly for 48 hours'),
-        ('daily', 'Daily  for 7 days'),
+        ("current", "Current"),
+        ("minute", "Minute for 1 hour"),
+        ("hourly", "Hourly for 48 hours"),
+        ("daily", "Daily  for 7 days"),
     )
     search_lat = models.FloatField()
     search_lon = models.FloatField()
@@ -20,6 +20,5 @@ class Weather(models.Model):
     )
     search_result = JSONField(null=True, blank=True)
 
+
 admin.site.register(Weather)
-
-
