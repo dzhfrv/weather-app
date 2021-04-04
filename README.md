@@ -31,7 +31,7 @@ DB_PWD = ''
     "search_lon": 20.243213
 }
 ```
-- __search_lat__ - lattitude
+- __search_lat__ - latitude
 - __search_lon__ - longitude
 - __search_type__ - detailing type
   (accepts "current", "minute", "hourly" or "daily")
