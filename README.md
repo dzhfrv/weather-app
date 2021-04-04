@@ -1,5 +1,6 @@
 # weather-app
 _Python3, Django, Django-rest-framework, Postgres_
+
 ###.env file is required
 _for receiving WEATHER_API_KEY visit: https://home.openweathermap.org/api_keys_
 ```dotenv
