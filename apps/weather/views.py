@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from config.settings import SEARCH_TIME_MINUTES
+from config.settings import DATA_RELEVANCE_TIME
 from .models import Weather
 from .serializers import WeatherEndpointDataSerializer
 from .utils import build_link, weather_api_call
@@ -27,7 +27,7 @@ class WeatherView(APIView):
         search_type = request.data['search_type']
 
         link = build_link(search_lat, search_lon, search_type)
-        minutes = timezone.now() - timedelta(minutes=SEARCH_TIME_MINUTES)
+        minutes = timezone.now() - timedelta(minutes=DATA_RELEVANCE_TIME)
 
         # __gte checks if object created 'minutes' ago
         obj = Weather.objects.filter(
