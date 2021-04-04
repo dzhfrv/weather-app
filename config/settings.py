@@ -110,5 +110,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # WeatherAPI settings
+# relevance of data stored in DB (in minutes)
+DATA_RELEVANCE_TIME = 10
+
+# set up in .env file. For new visit https://home.openweathermap.org/api_keys
 WEATHER_API_KEY = config('WEATHER_API_KEY')
-SEARCH_TIME_MINUTES = 1

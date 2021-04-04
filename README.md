@@ -40,3 +40,5 @@ minute: Minute forecast for 1 hour
 hourly: Hourly forecast for 48 hours
 daily: Daily forecast for 7 days
 ```
+
+Data stored in DB have relevance time. The DATA_RELEVANCE_TIME setting can be found in `config/settings.py` (settled to 10 minutes by default)
