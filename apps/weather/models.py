@@ -16,7 +16,6 @@ class Weather(models.Model):
     search_type = models.CharField(
         choices=FORECAST_TYPE,
         max_length=20,
-        default=0,
     )
     search_result = JSONField(null=True, blank=True)
 
